@@ -5,8 +5,7 @@ Agenda Craft is a simple yet powerful application built using Spring Boot, JPA (
 
 ## Features
 - User Registration and Authentication: Users can create an account and log in securely to access their agendas.
-- Agenda Management: Users can create, view, update, and delete multiple agendas.
-- Appointment Management: Users can schedule appointments, set reminders, and manage their appointments.
+- Agenda Management: Users can create, view, update, and delete multiple tasks.
 - Task Tracking: Users can create tasks, mark them as completed, and organize tasks within agendas.
 - Data Persistence: The application uses PostgreSQL database through JPA and Hibernate for data storage.
 

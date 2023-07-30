@@ -2,7 +2,7 @@ package com.agendaCraft.agendaCraft.dto;
 
 public class UserDTO {
 
-    public String name;
+    public String firstName;
     public String email;
     public String password;
 
@@ -26,8 +26,8 @@ public class UserDTO {
         return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getEmail() {
@@ -48,8 +48,8 @@ public class UserDTO {
     }
 
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
 

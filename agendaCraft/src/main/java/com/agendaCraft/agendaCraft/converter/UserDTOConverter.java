@@ -10,7 +10,7 @@ public class UserDTOConverter {
 
     public UserDTO convert(User user) {
         UserDTO userDTO = new UserDTO();
-        userDTO.setName(user.getName());
+        userDTO.setFirstName(user.getFirstName());
         userDTO.setEmail(user.getEmail());
         userDTO.setUsername(user.getUsername());
         userDTO.setLastName(user.getLastName());

@@ -1,62 +1,87 @@
 package com.agendaCraft.agendaCraft.domain;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-import java.util.List;
 
 
-// This is an entity in the underlying PostgreSQL database
 @Entity
-@Table(name="users")
-public class User {
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "username"),
+                @UniqueConstraint(columnNames = "email")
+        })
 
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name="name")
-    private String name;
-
-    @Column(name="last_name")
-    private String lastName;
-
-
+    @NotBlank
+    @Size(max = 20)
     @Column(name="username")
     private String username;
-    @Column(name="email")
+
+    @NotBlank
+    @Column(name="first-name")
+    private String firstName;
+
+    @NotBlank
+    @Column(name="last-name")
+    private String lastName;
+
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String email;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private List<Task> tasks;
-
-    @Column(name = "password")
+    @NotBlank
+    @Size(max = 120)
     private String password;
 
-    public String getName() {
-        return name;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(  name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
+    public User() {
     }
 
-
-    public void setUsername(String username) {
+    public User(String username, String email, String password, String firstName, String lastName) {
         this.username = username;
-    }
-
-    public void setLastName(String lastName) {
+        this.email = email;
+        this.password = password;
+        this.firstName  = firstName;
         this.lastName = lastName;
     }
-    public String getLastName() {
-        return lastName;
+
+    public Long getId() {
+        return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getUsername() {
         return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -67,26 +92,19 @@ public class User {
         this.email = email;
     }
 
-    /*public List<Task> getTasks() {
-        return tasks;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
-    }*/
-
-    public String getPassword() {
-        return password;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getLastName() {
+        return lastName;
     }
 
-
-    @Override
-    public String toString() {
-        return "User ID: " + id +
-                " Name: " + name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

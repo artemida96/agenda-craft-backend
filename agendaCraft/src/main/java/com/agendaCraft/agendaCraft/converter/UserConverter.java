@@ -10,7 +10,7 @@ public class UserConverter {
 
     public User converter(UserDTO userDTO) {
         User user = new User();
-        user.setName(userDTO.getName());
+        user.setFirstName(userDTO.getFirstName());
         user.setEmail(userDTO.getEmail());
         user.setPassword(userDTO.getPassword());
         user.setLastName(userDTO.getLastName());

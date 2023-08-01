@@ -2,6 +2,7 @@ package com.agendaCraft.agendaCraft.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,11 +27,9 @@ public class User {
     @Column(name="username")
     private String username;
 
-    @NotBlank
     @Column(name="first-name")
     private String firstName;
 
-    @NotBlank
     @Column(name="last-name")
     private String lastName;
 
@@ -41,6 +40,7 @@ public class User {
 
     @NotBlank
     @Size(max = 120)
+    @JsonIgnore
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY)

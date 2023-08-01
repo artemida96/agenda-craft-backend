@@ -8,4 +8,6 @@ public interface UserService {
     User createUser(UserDTO userDto);
 
     boolean userExists(String email);
+
+    User getCurrentUser(String username);
 }

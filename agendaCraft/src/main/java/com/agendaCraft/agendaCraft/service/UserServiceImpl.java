@@ -5,6 +5,7 @@ import com.agendaCraft.agendaCraft.converter.UserDTOConverter;
 import com.agendaCraft.agendaCraft.domain.User;
 import com.agendaCraft.agendaCraft.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.agendaCraft.agendaCraft.repository.UserRepository;
 
@@ -43,4 +44,12 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
             return user;
     }
+
+    @Override
+    public User getCurrentUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+
 }

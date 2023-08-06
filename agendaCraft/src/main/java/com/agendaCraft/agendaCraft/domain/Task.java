@@ -1,30 +1,37 @@
 package com.agendaCraft.agendaCraft.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
 
 
 @Entity
-@Table(name="task")
+@Table(name="tasks")
 public class Task {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
+    @NotNull
     @Column(name="name")
     private String name;
 
+    @NotNull
     @Column(name="due_date")
     private Date dueDate;
 
+
+    @JsonIgnore
     @Column(name="date_created")
     private Date dateCreated;
 
+    @JsonIgnore
     @Column(name = "user_id")
-    private Integer userId;
+    private Long assignedUserId;
 
     // Getters and Setters
     public String getName() {
@@ -51,12 +58,13 @@ public class Task {
         this.dateCreated = dateCreated;
     }
 
-    public Integer getPerson_id() {
-        return userId;
+
+    public Long getAssignedUserId() {
+        return assignedUserId;
     }
 
-    public void setUserId (Integer userId) {
-        this.userId = userId;
+    public void setAssignedUserId(Long assignedUseId){
+        this.assignedUserId = assignedUseId;
     }
 
     @Override

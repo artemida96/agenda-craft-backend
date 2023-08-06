@@ -1,5 +1,7 @@
 package com.agendaCraft.agendaCraft.controller;
 
+import com.agendaCraft.agendaCraft.domain.EnumRole;
+import com.agendaCraft.agendaCraft.domain.Role;
 import com.agendaCraft.agendaCraft.domain.User;
 
 import com.agendaCraft.agendaCraft.dto.UserDTO;
@@ -8,6 +10,7 @@ import com.agendaCraft.agendaCraft.repository.UserRepository;
 import com.agendaCraft.agendaCraft.response.JwtResponse;
 import com.agendaCraft.agendaCraft.security.jwt.JwtUtils;
 import com.agendaCraft.agendaCraft.security.services.UserDetailsImpl;
+import com.agendaCraft.agendaCraft.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,13 +20,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 
 @RestController
@@ -31,6 +37,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    UserServiceImpl userServiceImpl;
 
     @Autowired
     UserRepository userRepository;
@@ -55,8 +64,8 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         /*List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());*/ //TODO
+                .map(GrantedAuthority::getAuthority)
+                .toList();*/
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
@@ -67,59 +76,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody  UserDTO userDTO) {
+        User user = userServiceImpl.createUser(userDTO);
 
-
-        //TODO servvice
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Error: Username is already taken!");
+        if(user!=null){
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
         }
 
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Error: Email is already in use!");
-        }
-
-        // Create new user's account
-        User user = new User(userDTO.getUsername(),
-                userDTO.getEmail(),
-                encoder.encode(userDTO.getPassword()), userDTO.getFirstName(), userDTO.getLastName());
-
-       /* Set<String> strRoles = userDTO.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(EnumRole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(EnumRole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(EnumRole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(EnumRole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
-        }
-
-        user.setRoles(roles);*/
-        userRepository.save(user);
-
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.badRequest().body("User already exists");
     }
 }

@@ -2,7 +2,6 @@ package com.agendaCraft.agendaCraft.controller;
 
 import com.agendaCraft.agendaCraft.domain.User;
 import com.agendaCraft.agendaCraft.repository.UserRepository;
-import com.agendaCraft.agendaCraft.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,9 +14,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @Autowired
     UserRepository userRepository;

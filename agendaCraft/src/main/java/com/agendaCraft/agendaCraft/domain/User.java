@@ -1,6 +1,5 @@
 package com.agendaCraft.agendaCraft.domain;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -42,22 +41,22 @@ public class User {
     @Size(max = 120)
     @JsonIgnore
     private String password;
+    private String role;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(  name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private List<Task> tasks;
 
     public User() {
     }
 
-    public User(String username, String email, String password, String firstName, String lastName) {
+    public User(String username, String email, String password, String firstName, String lastName, String role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.firstName  = firstName;
         this.lastName = lastName;
+        this.role = role;
     }
 
     public Long getId() {
@@ -106,5 +105,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

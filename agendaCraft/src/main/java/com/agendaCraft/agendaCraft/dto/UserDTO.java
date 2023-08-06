@@ -1,5 +1,9 @@
 package com.agendaCraft.agendaCraft.dto;
 
+import com.agendaCraft.agendaCraft.domain.Role;
+
+import java.util.Set;
+
 public class UserDTO {
 
     public String firstName;
@@ -9,6 +13,8 @@ public class UserDTO {
     public String username;
 
     public String lastName;
+
+    public  String role;
 
     public void setUsername(String username) {
         this.username = username;
@@ -53,5 +59,12 @@ public class UserDTO {
     }
 
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
 }

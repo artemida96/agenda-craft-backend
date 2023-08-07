@@ -9,6 +9,8 @@ import com.agendaCraft.agendaCraft.response.JwtResponse;
 import com.agendaCraft.agendaCraft.security.jwt.JwtUtils;
 import com.agendaCraft.agendaCraft.security.services.UserDetailsImpl;
 import com.agendaCraft.agendaCraft.service.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +22,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 @RestController
@@ -43,6 +49,10 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    private Set<String> invalidatedTokens = new HashSet<>();
+
+
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody UserDTO  userDto) {
@@ -74,5 +84,27 @@ public class AuthController {
         }
 
         return ResponseEntity.badRequest().body("User already exists");
+    }
+
+
+    @PostMapping("/logout")
+    public String logout(@RequestHeader("Authorization") String authorizationHeader, HttpServletRequest request, HttpServletResponse response) {
+        String token = extractTokenFromAuthorizationHeader(authorizationHeader);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Check if the token has already been invalidated
+        if (invalidatedTokens.contains(token)) {
+            return "Token already invalidated. Logout not allowed.";
+        }
+        // Invalidate the token and mark it as invalidated
+        invalidatedTokens.add(token);
+        // Perform the logout action
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        return "Logged out successfully";
+    }
+    private String extractTokenFromAuthorizationHeader(String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7); // Remove "Bearer " prefix
+        }
+        return null;
     }
 }

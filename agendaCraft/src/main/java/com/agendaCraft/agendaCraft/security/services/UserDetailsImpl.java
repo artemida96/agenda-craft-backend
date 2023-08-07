@@ -3,6 +3,7 @@ package com.agendaCraft.agendaCraft.security.services;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.agendaCraft.agendaCraft.domain.User;
@@ -68,6 +69,9 @@ public class UserDetailsImpl implements UserDetails {
     public String getUsername() {
         return username;
     }
+
+
+
 
     @Override
     public boolean isAccountNonExpired() {

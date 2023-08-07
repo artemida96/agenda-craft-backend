@@ -1,4 +1,4 @@
-package com.agendaCraft.agendaCraft.domain;
+package com.agendaCraft.agendaCraft.enums;
 
 public enum EnumRole {
     ROLE_USER,

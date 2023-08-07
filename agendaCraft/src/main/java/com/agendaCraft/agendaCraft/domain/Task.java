@@ -1,15 +1,18 @@
 package com.agendaCraft.agendaCraft.domain;
 
 
+import com.agendaCraft.agendaCraft.enums.EnumStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.util.Date;
 
 
 @Entity
 @Table(name="tasks")
+@Data
 public class Task {
 
     @Id
@@ -31,45 +34,13 @@ public class Task {
 
     @JsonIgnore
     @Column(name = "user_id")
-    private Long assignedUserId;
+    private Long userId;
 
-    // Getters and Setters
-    public String getName() {
-        return name;
-    }
+    @Column (name= "status")
+    private EnumStatus status;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
+    @Column(name="isFavorite")
+    private Boolean isFavorite;
 
 
-    public Long getAssignedUserId() {
-        return assignedUserId;
-    }
-
-    public void setAssignedUserId(Long assignedUseId){
-        this.assignedUserId = assignedUseId;
-    }
-
-    @Override
-    public String toString() {
-        return "Task: " + name + " due at: " + dueDate.toString() +
-                " created at: " + dateCreated.toString();
-    }
 }

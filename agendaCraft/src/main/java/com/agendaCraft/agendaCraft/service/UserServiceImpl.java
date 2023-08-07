@@ -2,18 +2,21 @@ package com.agendaCraft.agendaCraft.service;
 
 import com.agendaCraft.agendaCraft.converter.UserConverter;
 import com.agendaCraft.agendaCraft.converter.UserDTOConverter;
-import com.agendaCraft.agendaCraft.domain.EnumRole;
+import com.agendaCraft.agendaCraft.enums.EnumRole;
 import com.agendaCraft.agendaCraft.domain.Role;
 import com.agendaCraft.agendaCraft.domain.User;
 import com.agendaCraft.agendaCraft.dto.UserDTO;
 import com.agendaCraft.agendaCraft.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.agendaCraft.agendaCraft.repository.UserRepository;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -45,6 +48,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean userExists(String email) {
         return userRepository.findAll().stream().anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public Optional<User> getCurrentUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return  userRepository.findByUsername(username);
     }
 
     @Override
@@ -89,12 +99,4 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return user;
     }
-
-    @Override
-    public User getCurrentUser(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    }
-
-
 }

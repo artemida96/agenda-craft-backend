@@ -11,5 +11,5 @@ public interface UserService {
 
     boolean userExists(String email);
 
-    User getCurrentUser(String username);
+    Optional<User> getCurrentUser();
 }

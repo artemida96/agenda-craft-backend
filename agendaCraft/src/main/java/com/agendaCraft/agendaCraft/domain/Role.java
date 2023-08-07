@@ -1,4 +1,5 @@
 package com.agendaCraft.agendaCraft.domain;
+import com.agendaCraft.agendaCraft.enums.EnumRole;
 import jakarta.persistence.*;
 
 @Entity

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -36,4 +38,19 @@ public class TaskController
         }
         return ResponseEntity.notFound().build();
     }
+
+    @RequestMapping
+    public ResponseEntity<List<Task>> getTasksForCurrentUser(@RequestParam Map<String, String> filters) {
+        List<Task> tasks;
+        if (!filters.isEmpty()) {
+            tasks = taskServiceImpl.getTasksWithDynamicFilters(filters);
+        } else {
+            tasks = taskServiceImpl.getAllTasks();
+        }
+        return ResponseEntity.ok(tasks);
+    }
+    //implement a single method that handles both filtered and
+    // unfiltered requests by checking for
+    // the presence of filters in the query parameters.
+    //maintain code flexibility while optimizing query execution based on the use case.
 }

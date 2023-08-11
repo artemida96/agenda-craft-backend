@@ -1,16 +1,15 @@
-#!/bin/bash
-set -e
+# Use a specific version of the JDK
+FROM eclipse-temurin:17-jdk-alpine
 
-# Get the IP address of the psql-db container
-PSQL_DB_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' psql-db)
+# Set the working directory within the container
+WORKDIR /app
 
-# Wait for PostgreSQL to be ready
-until pg_isready -h $PSQL_DB_IP -p 5432 -U artemisadmin; do
-   echo "Waiting for PostgreSQL to become available..."
-   sleep 2
-done
+# Copy the JAR file from the build context into the container
+COPY target/agendaCraft-0.0.1-SNAPSHOT.jar agendaCraft.jar
 
-# Restore the database using psql
-psql -h $PSQL_DB_IP -U artemisadmin -d agendaCraft < /docker-entrypoint-initdb.d/agendaCraft.sql
 
-echo "Database restoration complete."
+COPY backup.sh /backup.sh
+RUN chmod +x /backup.sh
+
+# Start the Java application
+CMD ["java", "-jar", "agendaCraft.jar"]

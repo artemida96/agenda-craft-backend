@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
         String strRole = userDTO.getRole();
         Set<Role> roles = new HashSet<>();
 
-        if (strRole == null) {
+        /*if (strRole == null) {
             Role userRole = roleRepository.findByName(EnumRole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                     roles.add(userRole);
             }
-        }
+        }*/
         user.setRole(strRole);
         userRepository.save(user);
         return user;

@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   psql-db:
@@ -14,32 +14,19 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
-  backup-service:
-    image: postgres:latest
-    container_name: backup-container
-    volumes:
-      - ./backup.sh:/backup.sh
-    depends_on:
-      - psql-db
-    environment:
-      - PGPASSWORD=artemaki
-    entrypoint: [ "sh", "-c", "/backup.sh" ]
 
   restore-service:
     image: postgres:latest
     container_name: restore-container
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./init-scripts:/docker-entrypoint-initdb.d
-    depends_on:
-      - psql-db
     environment:
       - PGPASSWORD=artemaki
     command: >
       bash -c "
-      pg_restore --host=psql-db --port=5432 --username=artemisadmin --dbname=agendaCraft --data-only  --no-owner /docker-entrypoint-initdb.d/agendaCraft.dump"
+      while ! pg_isready -h psql-db -p 5432 -U artemisadmin; do sleep 1; done;
+      pg_restore --host=psql-db --port=5432 --username=artemisadmin --dbname=agendaCraft --no-owner --verbose /docker-entrypoint-initdb.d/agendaCraft.dump"
+    depends_on:
+      - psql-db
+
   agendacraft:
     build:
       context: .
@@ -56,5 +43,6 @@ services:
     depends_on:
       - psql-db
     entrypoint: [ "sh", "-c", "while ! pg_isready -h psql-db -p 5432 -U artemisadmin; do sleep 1; done; PATH=$PATH:/usr/local/openjdk-17/bin java -jar agendaCraft.jar" ]
+
 volumes:
-      postgres-data:
+  postgres-data:

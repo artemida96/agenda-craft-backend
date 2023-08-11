@@ -8,8 +8,5 @@ WORKDIR /app
 COPY target/agendaCraft-0.0.1-SNAPSHOT.jar agendaCraft.jar
 
 
-COPY backup.sh /backup.sh
-RUN chmod +x /backup.sh
-
 # Start the Java application
 CMD ["java", "-jar", "agendaCraft.jar"]

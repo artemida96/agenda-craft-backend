@@ -14,18 +14,31 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-h", "localhost", "-U", "artemisadmin", "-d", "agendaCraft" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   restore-service:
     image: postgres:latest
     container_name: restore-container
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      -  restore-flag:/restore-flag
+
     environment:
       - PGPASSWORD=artemaki
+    depends_on:
+      psql-db:
+        condition: service_healthy  # Only depend on psql-db when it's healthy
     command: >
       bash -c "
-      while ! pg_isready -h psql-db -p 5432 -U artemisadmin; do sleep 1; done;
-      pg_restore --host=psql-db --port=5432 --username=artemisadmin --dbname=agendaCraft --no-owner --verbose /docker-entrypoint-initdb.d/agendaCraft.dump"
-    depends_on:
-      - psql-db
+      if [ ! -f /restore-flag/restored.txt ]; then
+        while ! pg_isready -h psql-db -p 5432 -U artemisadmin; do sleep 1; done;
+        pg_restore --host=psql-db --port=5432 --username=artemisadmin --dbname=agendaCraft --no-owner --verbose /docker-entrypoint-initdb.d/agendaCraft.dump
+        touch /restore-flag/restored.txt
+      fi"
 
   agendacraft:
     build:
@@ -41,8 +54,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=artemaki
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
-      - psql-db
-    entrypoint: [ "sh", "-c", "while ! pg_isready -h psql-db -p 5432 -U artemisadmin; do sleep 1; done; PATH=$PATH:/usr/local/openjdk-17/bin java -jar agendaCraft.jar" ]
+      psql-db:
+        condition: service_healthy  # Only depend on psql-db when it's healthy
+    command: ["java", "-jar", "agendaCraft.jar"]
 
 volumes:
   postgres-data:
+  restore-flag:

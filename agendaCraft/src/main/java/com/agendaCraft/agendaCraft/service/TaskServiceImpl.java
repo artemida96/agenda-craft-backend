@@ -2,7 +2,7 @@ package com.agendaCraft.agendaCraft.service;
 
 import com.agendaCraft.agendaCraft.domain.Task;
 import com.agendaCraft.agendaCraft.domain.User;
-import com.agendaCraft.agendaCraft.enums.EnumStatus;
+import com.agendaCraft.agendaCraft.enums.EnumTaskStatus;
 import com.agendaCraft.agendaCraft.repository.TaskRepository;
 import com.agendaCraft.agendaCraft.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -17,8 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -51,7 +52,12 @@ public class TaskServiceImpl implements TaskService {
             task.setUserId(user.getId()); //assign task to the owner by token
         }
         task.setDateCreated(new Date());
-        task.setStatus(EnumStatus.DRAFT);
+        if(Objects.isNull(task.getStatus())) {
+            task.setStatus(EnumTaskStatus.PENDING);
+        }
+        if(task.getDateCreated().after(task.getDueDate())){
+            task.setStatus(EnumTaskStatus.CANCELED);
+        }
         return taskRepository.save(task);
     }
 
@@ -63,16 +69,35 @@ public class TaskServiceImpl implements TaskService {
             String username = authentication.getName();
             User user = userRepository.findByUsername(username).orElse(null);
             if (Objects.nonNull(user) && user.getId().equals(existingTask.getUserId())) {
-                existingTask.setName(updatedTask.getName());
+                existingTask.setTitle(updatedTask.getTitle());
                 existingTask.setDueDate(updatedTask.getDueDate());
                 Date currentDate = new Date();
-                if( currentDate.before( updatedTask.getDueDate())){
-                    existingTask.setStatus(EnumStatus.EXPIRED);
+                if(Objects.isNull(updatedTask.getStatus())) {
+                    updatedTask.setStatus(EnumTaskStatus.PENDING);
+                }
+                if(existingTask.getDateCreated().after(updatedTask.getDueDate())){
+                    updatedTask.setStatus(EnumTaskStatus.EXPIRED);
                 }
                 return taskRepository.save(existingTask);
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean delete(Long taskId) {
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (optionalTask.isPresent() && Objects.nonNull(user)) {
+            Task task = optionalTask.get();
+            if (task.getUserId() != null && task.getUserId().equals(user.getId())) {
+                taskRepository.delete(task);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -130,15 +155,51 @@ public class TaskServiceImpl implements TaskService {
 
     private Predicate createFilterPredicate(CriteriaBuilder cb, Root<Task> root,
                                             Field field, String filterValue) {
-        // Customize the logic to create a predicate based on the field and filter value
-        // Handle casting, comparisons, and different data types
-        if (field.getType() == Boolean.class) {
+        Class<?> fieldType = field.getType();
+
+        if (fieldType == Boolean.class) {
             Boolean value = Boolean.parseBoolean(filterValue);
             return cb.equal(root.get(field.getName()), value);
-        } else if (field.getType() == Integer.class) {
+        } else if (fieldType == Integer.class) {
             Integer value = Integer.parseInt(filterValue);
             return cb.equal(root.get(field.getName()), value);
         }
+        else if (EnumTaskStatus.class.isAssignableFrom(fieldType)) {
+            if (filterValue.equals("unCompleted")) {
+                return cb.notEqual(root.get(field.getName()), EnumTaskStatus.COMPLETED);
+            } else {
+                EnumTaskStatus status = EnumTaskStatus.valueOf(filterValue); // Assuming filterValue matches enum values
+                return cb.equal(root.get(field.getName()), status);
+            }
+        }
+         else if (fieldType == Date.class) {
+            try {
+                Date filterDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(filterValue);
+
+                // Calculate the start and end of the filter date
+                Calendar startOfDay = Calendar.getInstance();
+                startOfDay.setTime(filterDate);
+                startOfDay.set(Calendar.HOUR_OF_DAY, 0);
+                startOfDay.set(Calendar.MINUTE, 0);
+                startOfDay.set(Calendar.SECOND, 0);
+                startOfDay.set(Calendar.MILLISECOND, 0);
+
+                Calendar endOfDay = Calendar.getInstance();
+                endOfDay.setTime(filterDate);
+                endOfDay.set(Calendar.HOUR_OF_DAY, 23);
+                endOfDay.set(Calendar.MINUTE, 59);
+                endOfDay.set(Calendar.SECOND, 59);
+                endOfDay.set(Calendar.MILLISECOND, 999);
+
+                // Create a predicate that checks for tasks created during the current day
+                return cb.and(
+                        cb.between(root.get("dateCreated"), startOfDay.getTime(), endOfDay.getTime())
+                );
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         // If field type is not recognized, return a default predicate
         return cb.conjunction();
     }

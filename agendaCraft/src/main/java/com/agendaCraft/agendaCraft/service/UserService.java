@@ -9,6 +9,8 @@ public interface UserService {
     User findById(int id);
     User createUser(UserDTO userDto);
 
+    User updateUser(UserDTO userDto);
+
     boolean userExists(String email);
 
     Optional<User> getCurrentUser();

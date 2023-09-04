@@ -8,6 +8,8 @@ public interface TaskService {
     Task create(Task task);
 
     Task edit(Long id, Task task);
+
+    boolean delete(Long id);
     List<Task> getAllTasks();
 
 }

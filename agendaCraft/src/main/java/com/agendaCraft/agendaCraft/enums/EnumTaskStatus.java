@@ -1,7 +1,9 @@
 package com.agendaCraft.agendaCraft.enums;
-public enum EnumStatus {
+public enum EnumTaskStatus {
     IN_PROGRESS,
+    PENDING,
+    COMPLETED,
+    CANCELED,
 
-    DRAFT,
     EXPIRED
 }

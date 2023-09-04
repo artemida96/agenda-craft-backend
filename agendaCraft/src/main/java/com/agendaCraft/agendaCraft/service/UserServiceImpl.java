@@ -14,8 +14,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.agendaCraft.agendaCraft.repository.UserRepository;
+import org.webjars.NotFoundException;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,10 +53,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getCurrentUser(){
+    public Optional<User> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        return  userRepository.findByUsername(username);
+        return userRepository.findByUsername(username);
+    }
+
+    public User updateUser(UserDTO userDTO) {
+        Optional<User> optionalUser = userRepository.findByUsername(userDTO.getUsername());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setUsername(userDTO.getUsername());
+            user.setEmail(userDTO.getEmail());
+            user.setPassword(encoder.encode(userDTO.getPassword()));
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setRole(userDTO.getRole());
+            user.setTasks(userDTO.getTasks());
+            return userRepository.save(user);
+        } else {
+          return null;
+        }
     }
 
     @Override
@@ -66,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User(userDTO.getUsername(),
                 userDTO.getEmail(),
-                encoder.encode(userDTO.getPassword()), userDTO.getFirstName(), userDTO.getLastName(), userDTO.getRole());
+                encoder.encode(userDTO.getPassword()), userDTO.getFirstName(), userDTO.getLastName(), userDTO.getRole(), null);
 
         String strRole = userDTO.getRole();
         Set<Role> roles = new HashSet<>();

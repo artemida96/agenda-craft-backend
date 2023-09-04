@@ -1,8 +1,10 @@
 package com.agendaCraft.agendaCraft.domain;
 
 
-import com.agendaCraft.agendaCraft.enums.EnumStatus;
+import com.agendaCraft.agendaCraft.deserializer.EnumTaskStatusDeserializer;
+import com.agendaCraft.agendaCraft.enums.EnumTaskStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -21,14 +23,12 @@ public class Task {
 
     @NotNull
     @Column(name="name")
-    private String name;
+    private String title;
 
     @NotNull
     @Column(name="due_date")
     private Date dueDate;
 
-
-    @JsonIgnore
     @Column(name="date_created")
     private Date dateCreated;
 
@@ -36,11 +36,15 @@ public class Task {
     @Column(name = "user_id")
     private Long userId;
 
+    @JsonDeserialize(using = EnumTaskStatusDeserializer.class)
     @Column (name= "status")
-    private EnumStatus status;
+    @Enumerated(EnumType.STRING)
+    private EnumTaskStatus status;
 
     @Column(name="isFavorite")
     private Boolean isFavorite;
 
+    @Column(name="description")
+    private String description;
 
 }

@@ -39,6 +39,15 @@ public class TaskController
         return ResponseEntity.notFound().build();
     }
 
+    @DeleteMapping("/task/{taskId}")
+    public ResponseEntity<Object> delete(@PathVariable Long taskId) {
+        boolean deleted = taskServiceImpl.delete(taskId);
+        if (deleted) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @RequestMapping
     public ResponseEntity<List<Task>> getTasksForCurrentUser(@RequestParam Map<String, String> filters) {
         List<Task> tasks;
@@ -49,8 +58,4 @@ public class TaskController
         }
         return ResponseEntity.ok(tasks);
     }
-    //implement a single method that handles both filtered and
-    // unfiltered requests by checking for
-    // the presence of filters in the query parameters.
-    //maintain code flexibility while optimizing query execution based on the use case.
 }

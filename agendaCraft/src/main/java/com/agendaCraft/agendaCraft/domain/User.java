@@ -50,13 +50,14 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String password, String firstName, String lastName, String role) {
+    public User(String username, String email, String password, String firstName, String lastName, String role, List<Task> tasks) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.firstName  = firstName;
         this.lastName = lastName;
         this.role = role;
+        this.tasks = tasks;
     }
 
 }
